@@ -25,6 +25,7 @@ interface Batch {
   _id: string;
   batchCode: string;
   name: string;
+  category: 'chick' | 'adult';
 }
 
 interface IncubatorDialogProps {
@@ -56,7 +57,13 @@ export default function IncubatorDialog({ open, onOpenChange }: IncubatorDialogP
       const result = await response.json();
       if (result.success) {
         const activeBatches = result.data.filter((b: any) => !b.archived);
-        setBatches(activeBatches);
+        // Sort batches: adults first (more likely to lay eggs for incubation), then chicks
+        const sortedBatches = activeBatches.sort((a: Batch, b: Batch) => {
+          if (a.category === 'adult' && b.category === 'chick') return -1;
+          if (a.category === 'chick' && b.category === 'adult') return 1;
+          return 0;
+        });
+        setBatches(sortedBatches);
       }
     } catch (error) {
       console.error('Failed to fetch batches:', error);
@@ -125,7 +132,7 @@ export default function IncubatorDialog({ open, onOpenChange }: IncubatorDialogP
               <SelectContent>
                 {batches.map((batch) => (
                   <SelectItem key={batch._id} value={batch._id}>
-                    {batch.name} ({batch.batchCode})
+                    {batch.name} ({batch.batchCode}) - {batch.category === 'adult' ? '🐔 Adult' : '🐣 Chick'}
                   </SelectItem>
                 ))}
               </SelectContent>

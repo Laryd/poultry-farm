@@ -24,6 +24,8 @@ import { toast } from 'sonner';
 interface Batch {
   _id: string;
   name: string;
+  batchCode: string;
+  category: 'chick' | 'adult';
 }
 
 interface VaccinationDialogProps {
@@ -53,7 +55,14 @@ export default function VaccinationDialog({ open, onOpenChange }: VaccinationDia
       const response = await fetch('/api/batches');
       const data = await response.json();
       if (data.success) {
-        setBatches(data.data.filter((b: any) => !b.archived));
+        const activeBatches = data.data.filter((b: any) => !b.archived);
+        // Sort batches: chicks first (more likely to need vaccinations), then adults
+        const sortedBatches = activeBatches.sort((a: Batch, b: Batch) => {
+          if (a.category === 'chick' && b.category === 'adult') return -1;
+          if (a.category === 'adult' && b.category === 'chick') return 1;
+          return 0;
+        });
+        setBatches(sortedBatches);
       }
     } catch (error) {
       toast.error('Failed to fetch batches');
@@ -111,7 +120,7 @@ export default function VaccinationDialog({ open, onOpenChange }: VaccinationDia
               <SelectContent>
                 {batches.map((batch) => (
                   <SelectItem key={batch._id} value={batch._id}>
-                    {batch.name}
+                    {batch.name} ({batch.batchCode}) - {batch.category === 'adult' ? '🐔 Adult' : '🐣 Chick'}
                   </SelectItem>
                 ))}
               </SelectContent>
