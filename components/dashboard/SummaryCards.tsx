@@ -42,7 +42,7 @@ export default function SummaryCards({ data }: SummaryCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{data.totalChicks}</div>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Under 90 days old
+            Day-old to young birds
           </p>
         </CardContent>
       </Card>
@@ -57,7 +57,7 @@ export default function SummaryCards({ data }: SummaryCardsProps) {
         <CardContent>
           <div className="text-2xl font-bold">{data.totalAdults}</div>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            90+ days old
+            Mature/laying birds
           </p>
         </CardContent>
       </Card>
