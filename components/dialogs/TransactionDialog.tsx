@@ -202,14 +202,13 @@ export default function TransactionDialog({ open, onOpenChange }: TransactionDia
           <div className="space-y-2">
             <Label htmlFor="batchId">Batch (Optional)</Label>
             <Select
-              value={formData.batchId}
+              value={formData.batchId || undefined}
               onValueChange={(value) => setFormData({ ...formData, batchId: value })}
             >
               <SelectTrigger id="batchId">
-                <SelectValue placeholder="Select batch (optional)" />
+                <SelectValue placeholder="No specific batch" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No specific batch</SelectItem>
                 {batches.map((batch) => (
                   <SelectItem key={batch._id} value={batch._id}>
                     {batch.name} ({batch.batchCode})
