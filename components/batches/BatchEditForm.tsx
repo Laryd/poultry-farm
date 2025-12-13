@@ -7,6 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,6 +32,7 @@ interface Batch {
   batchCode: string;
   name: string;
   breed: string;
+  category: 'chick' | 'adult';
   startDate: string;
   archived: boolean;
 }
@@ -40,6 +48,7 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
   const [formData, setFormData] = useState({
     name: batch.name,
     breed: batch.breed,
+    category: batch.category,
     archived: batch.archived,
   });
 
@@ -129,6 +138,25 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
           onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category</Label>
+        <Select
+          value={formData.category}
+          onValueChange={(value: 'chick' | 'adult') => setFormData({ ...formData, category: value })}
+        >
+          <SelectTrigger id="category">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="chick">Chick (Day-Old to Young)</SelectItem>
+            <SelectItem value="adult">Adult (Mature/Layers)</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Update if birds have matured from chicks to adults
+        </p>
       </div>
 
       <div className="space-y-2">

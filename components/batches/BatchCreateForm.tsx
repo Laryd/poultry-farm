@@ -5,6 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 
 export default function BatchCreateForm() {
@@ -14,6 +21,7 @@ export default function BatchCreateForm() {
     name: '',
     breed: '',
     currentSize: '',
+    category: 'chick' as 'chick' | 'adult',
     startDate: new Date().toISOString().split('T')[0],
   });
 
@@ -29,6 +37,7 @@ export default function BatchCreateForm() {
           name: formData.name,
           breed: formData.breed,
           currentSize: parseInt(formData.currentSize),
+          category: formData.category,
           startDate: formData.startDate,
         }),
       });
@@ -71,6 +80,25 @@ export default function BatchCreateForm() {
           onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="category">Category <span className="text-red-500">*</span></Label>
+        <Select
+          value={formData.category}
+          onValueChange={(value: 'chick' | 'adult') => setFormData({ ...formData, category: value })}
+        >
+          <SelectTrigger id="category">
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="chick">Chick (Day-Old to Young)</SelectItem>
+            <SelectItem value="adult">Adult (Mature/Layers)</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Select whether this batch is chicks or adults
+        </p>
       </div>
 
       <div className="space-y-2">

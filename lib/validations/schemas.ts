@@ -16,12 +16,14 @@ export const createBatchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
   currentSize: z.number().int().min(1, 'Batch size must be at least 1'),
   breed: z.string().min(1, 'Breed is required'),
+  category: z.enum(['chick', 'adult']).default('chick'),
   startDate: z.string().or(z.date()),
 });
 
 export const updateBatchSchema = z.object({
   name: z.string().min(1).optional(),
   breed: z.string().min(1).optional(),
+  category: z.enum(['chick', 'adult']).optional(),
   archived: z.boolean().optional(),
 });
 

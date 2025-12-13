@@ -8,6 +8,7 @@ export interface IBatch extends Document {
   currentSize: number;
   initialSize: number;
   breed: string;
+  category: 'chick' | 'adult';
   startDate: Date;
   archived: boolean;
   createdAt: Date;
@@ -57,6 +58,12 @@ const BatchSchema: Schema<IBatch> = new Schema(
       required: [true, 'Breed is required'],
       trim: true,
     },
+    category: {
+      type: String,
+      enum: ['chick', 'adult'],
+      required: [true, 'Category is required'],
+      default: 'chick',
+    },
     startDate: {
       type: Date,
       required: [true, 'Start date is required'],
@@ -79,7 +86,7 @@ BatchSchema.methods.getAgeInDays = function (): number {
 };
 
 BatchSchema.methods.isChick = function (): boolean {
-  return this.getAgeInDays() < 90;
+  return this.category === 'chick';
 };
 
 BatchSchema.methods.canLayEggs = function (): boolean {

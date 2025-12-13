@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, currentSize, breed, startDate } = validatedFields.data;
+    const { name, currentSize, breed, category, startDate } = validatedFields.data;
     let { batchCode } = validatedFields.data;
 
     await connectDB();
@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       currentSize,
       initialSize: currentSize,
       breed,
+      category,
       startDate: new Date(startDate),
       archived: false,
     });

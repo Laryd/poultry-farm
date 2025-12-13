@@ -23,19 +23,8 @@ async function getDashboardData(userId: string, batchId?: string) {
 
   const totalBirds = batches.reduce((sum, batch) => sum + batch.currentSize, 0);
 
-  const chickBatches = batches.filter((batch) => {
-    const ageInDays = Math.floor(
-      (Date.now() - new Date(batch.startDate).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return ageInDays < 90;
-  });
-
-  const adultBatches = batches.filter((batch) => {
-    const ageInDays = Math.floor(
-      (Date.now() - new Date(batch.startDate).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return ageInDays >= 90;
-  });
+  const chickBatches = batches.filter((batch) => batch.category === 'chick');
+  const adultBatches = batches.filter((batch) => batch.category === 'adult');
 
   const totalChicks = chickBatches.reduce((sum, batch) => sum + batch.currentSize, 0);
   const totalAdults = adultBatches.reduce((sum, batch) => sum + batch.currentSize, 0);
