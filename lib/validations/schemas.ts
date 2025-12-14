@@ -18,6 +18,7 @@ export const createBatchSchema = z.object({
   breed: z.string().min(1, 'Breed is required'),
   category: z.enum(['chick', 'adult']).default('chick'),
   startDate: z.string().or(z.date()),
+  totalCost: z.number().min(0, 'Total cost cannot be negative').optional(),
 });
 
 export const updateBatchSchema = z.object({
@@ -39,6 +40,7 @@ export const createEggLogSchema = z.object({
   sold: z.number().int().min(0, 'Sold eggs cannot be negative').default(0),
   spoiled: z.number().int().min(0, 'Spoiled eggs cannot be negative').default(0),
   date: z.string().or(z.date()).optional(),
+  pricePerEgg: z.number().min(0, 'Price per egg cannot be negative').optional(),
 });
 
 export const createIncubatorLogSchema = z.object({
@@ -75,6 +77,8 @@ export const createTransactionSchema = z.object({
   amount: z.number().min(0, 'Amount cannot be negative'),
   description: z.string().min(1, 'Description is required'),
   batchId: z.string().optional(),
+  feedId: z.string().optional(),
+  eggId: z.string().optional(),
   date: z.string().or(z.date()).optional(),
 });
 

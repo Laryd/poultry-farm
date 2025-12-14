@@ -34,6 +34,7 @@ interface TransactionDialogProps {
 
 const EXPENSE_CATEGORIES = [
   'Feed',
+  'Stock Purchase',
   'Medication',
   'Vaccines',
   'Utilities',

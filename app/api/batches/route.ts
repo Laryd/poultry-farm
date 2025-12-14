@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db/mongodb';
 import Batch from '@/lib/models/Batch';
+import Transaction from '@/lib/models/Transaction';
 import { requireAuth } from '@/lib/auth/get-session';
 import { createBatchSchema } from '@/lib/validations/schemas';
 
@@ -53,7 +55,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, currentSize, breed, category, startDate } = validatedFields.data;
+    const { name, currentSize, breed, category, startDate, totalCost } = validatedFields.data;
     let { batchCode } = validatedFields.data;
 
     await connectDB();
@@ -77,7 +79,25 @@ export async function POST(request: NextRequest) {
       category,
       startDate: new Date(startDate),
       archived: false,
+      totalCost,
     });
+
+    // Auto-create expense transaction if totalCost provided and > 0
+    if (totalCost && totalCost > 0) {
+      await Transaction.create({
+        userId: session!.user.id,
+        type: 'expense',
+        category: 'Stock Purchase',
+        amount: totalCost,
+        description: `${category === 'chick' ? 'Chick' : 'Adult bird'} purchase: ${name} - ${currentSize} birds (${breed})`,
+        batchId: batch._id,
+        date: batch.startDate,
+      });
+
+      // Revalidate pages that show financial data
+      revalidatePath('/dashboard');
+      revalidatePath('/finances');
+    }
 
     return NextResponse.json(
       {

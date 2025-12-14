@@ -7,6 +7,8 @@ export interface ITransaction extends Document {
   amount: number;
   description: string;
   batchId?: Types.ObjectId;
+  feedId?: Types.ObjectId;
+  eggId?: Types.ObjectId;
   date: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -43,6 +45,16 @@ const TransactionSchema: Schema<ITransaction> = new Schema(
     batchId: {
       type: Schema.Types.ObjectId,
       ref: 'Batch',
+      index: true,
+    },
+    feedId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Feed',
+      index: true,
+    },
+    eggId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Egg',
       index: true,
     },
     date: {

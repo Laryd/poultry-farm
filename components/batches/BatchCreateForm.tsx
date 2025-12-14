@@ -23,6 +23,7 @@ export default function BatchCreateForm() {
     currentSize: '',
     category: 'chick' as 'chick' | 'adult',
     startDate: new Date().toISOString().split('T')[0],
+    totalCost: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,6 +40,7 @@ export default function BatchCreateForm() {
           currentSize: parseInt(formData.currentSize),
           category: formData.category,
           startDate: formData.startDate,
+          totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
         }),
       });
 
@@ -126,6 +128,22 @@ export default function BatchCreateForm() {
           onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
           required
         />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="totalCost">Total Cost (Optional)</Label>
+        <Input
+          id="totalCost"
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="e.g., 15000"
+          value={formData.totalCost}
+          onChange={(e) => setFormData({ ...formData, totalCost: e.target.value })}
+        />
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Total cost to purchase this batch. A transaction will be created automatically.
+        </p>
       </div>
 
       <div className="flex gap-2 pt-4">

@@ -42,6 +42,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
     collected: '0',
     sold: '0',
     spoiled: '0',
+    pricePerEgg: '',
   });
 
   useEffect(() => {
@@ -88,6 +89,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
           collected: parseInt(formData.collected),
           sold: parseInt(formData.sold),
           spoiled: parseInt(formData.spoiled),
+          pricePerEgg: formData.pricePerEgg ? parseFloat(formData.pricePerEgg) : undefined,
         }),
       });
 
@@ -98,7 +100,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
       }
 
       toast.success(data.message || 'Egg log recorded successfully');
-      setFormData({ batchId: '', collected: '0', sold: '0', spoiled: '0' });
+      setFormData({ batchId: '', collected: '0', sold: '0', spoiled: '0', pricePerEgg: '' });
       onOpenChange(false);
       router.refresh();
     } catch (error: any) {
@@ -168,6 +170,22 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
               value={formData.spoiled}
               onChange={(e) => setFormData({ ...formData, spoiled: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pricePerEgg">Price per Egg (Optional)</Label>
+            <Input
+              id="pricePerEgg"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="e.g., 15"
+              value={formData.pricePerEgg}
+              onChange={(e) => setFormData({ ...formData, pricePerEgg: e.target.value })}
+            />
+            <p className="text-sm text-muted-foreground">
+              Price per egg sold. Income transaction will be created automatically.
+            </p>
           </div>
 
           <div className="flex gap-2">

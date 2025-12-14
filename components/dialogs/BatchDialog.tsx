@@ -27,6 +27,7 @@ export default function BatchDialog({ open, onOpenChange }: BatchDialogProps) {
     currentSize: '',
     breed: '',
     startDate: '',
+    totalCost: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +41,7 @@ export default function BatchDialog({ open, onOpenChange }: BatchDialogProps) {
         body: JSON.stringify({
           ...formData,
           currentSize: parseInt(formData.currentSize),
+          totalCost: formData.totalCost ? parseFloat(formData.totalCost) : undefined,
         }),
       });
 
@@ -50,7 +52,7 @@ export default function BatchDialog({ open, onOpenChange }: BatchDialogProps) {
       }
 
       toast.success('Batch created successfully');
-      setFormData({ name: '', currentSize: '', breed: '', startDate: '' });
+      setFormData({ name: '', currentSize: '', breed: '', startDate: '', totalCost: '' });
       onOpenChange(false);
       router.refresh();
     } catch (error: any) {
@@ -113,6 +115,22 @@ export default function BatchDialog({ open, onOpenChange }: BatchDialogProps) {
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="totalCost">Total Cost (Optional)</Label>
+            <Input
+              id="totalCost"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="e.g., 15000"
+              value={formData.totalCost}
+              onChange={(e) => setFormData({ ...formData, totalCost: e.target.value })}
+            />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Total cost to purchase this batch. A transaction will be created automatically.
+            </p>
           </div>
 
           <div className="flex gap-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import Link from 'next/link';
@@ -17,16 +17,12 @@ export default function DashboardFinancialSummary({ batchId }: DashboardFinancia
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchSummary();
-  }, [batchId]);
-
-  const fetchSummary = async () => {
+  const fetchSummary = useCallback(async () => {
     try {
       const url = batchId
-        ? `/api/finances/analytics?period=30days&batchId=${batchId}`
+        ? `/api/finances/analytics?period=30days&batch=${batchId}`
         : '/api/finances/analytics?period=30days';
-      const response = await fetch(url);
+      const response = await fetch(url, { cache: 'no-store' });
       const result = await response.json();
       if (result.success) {
         setSummary(result.data.summary);
@@ -36,7 +32,35 @@ export default function DashboardFinancialSummary({ batchId }: DashboardFinancia
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [batchId]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchSummary();
+  }, [fetchSummary]);
+
+  // Auto-refresh every 3 seconds to pick up new transactions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchSummary();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [fetchSummary]);
+
+  // Refetch when page becomes visible (e.g., after navigating back)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchSummary();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [fetchSummary]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {

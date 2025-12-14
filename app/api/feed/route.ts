@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db/mongodb';
 import Feed from '@/lib/models/Feed';
+import Transaction from '@/lib/models/Transaction';
 import { requireAuth } from '@/lib/auth/get-session';
 import { createFeedLogSchema } from '@/lib/validations/schemas';
 
@@ -59,6 +61,23 @@ export async function POST(request: NextRequest) {
       totalKg: bags * kgPerBag,
       date: date ? new Date(date) : new Date(),
     });
+
+    // Auto-create expense transaction if price > 0
+    if (price > 0) {
+      await Transaction.create({
+        userId: session!.user.id,
+        type: 'expense',
+        category: 'Feed',
+        amount: price,
+        description: `Feed purchase: ${bags} bags of ${type} (${bags * kgPerBag}kg total)`,
+        feedId: feed._id,
+        date: feed.date,
+      });
+
+      // Revalidate pages that show financial data
+      revalidatePath('/dashboard');
+      revalidatePath('/finances');
+    }
 
     return NextResponse.json(
       {
