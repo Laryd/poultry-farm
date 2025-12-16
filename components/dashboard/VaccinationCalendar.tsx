@@ -10,6 +10,7 @@ import { Check, Calendar as CalendarIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils/date';
 import { isSameDay, parseISO } from 'date-fns';
+import CompleteVaccinationDialog from './CompleteVaccinationDialog';
 
 interface Vaccination {
   _id: string;
@@ -19,7 +20,7 @@ interface Vaccination {
   status: 'pending' | 'completed' | 'overdue';
   batchId: {
     name: string;
-    batchCode: string;
+    batchCode?: string;
   };
 }
 
@@ -33,6 +34,8 @@ export default function VaccinationCalendar({ batchId, refreshKey }: Vaccination
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
 
   useEffect(() => {
     fetchVaccinations();
@@ -53,26 +56,14 @@ export default function VaccinationCalendar({ batchId, refreshKey }: Vaccination
     }
   };
 
-  const markAsCompleted = async (id: string) => {
-    try {
-      const response = await fetch(`/api/vaccinations/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
+  const handleMarkAsCompleted = (vaccination: Vaccination) => {
+    setSelectedVaccination(vaccination);
+    setDialogOpen(true);
+  };
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to mark vaccination as completed');
-      }
-
-      toast.success('Vaccination marked as completed');
-      fetchVaccinations();
-      router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update vaccination');
-    }
+  const handleDialogSuccess = () => {
+    fetchVaccinations();
+    router.refresh();
   };
 
   const getStatusBadge = (status: string) => {
@@ -192,7 +183,7 @@ export default function VaccinationCalendar({ batchId, refreshKey }: Vaccination
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => markAsCompleted(vaccination._id)}
+                          onClick={() => handleMarkAsCompleted(vaccination)}
                           className="w-full"
                         >
                           <Check className="h-4 w-4 mr-1" />
@@ -207,6 +198,12 @@ export default function VaccinationCalendar({ batchId, refreshKey }: Vaccination
           </div>
         )}
       </CardContent>
+      <CompleteVaccinationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        vaccination={selectedVaccination}
+        onSuccess={handleDialogSuccess}
+      />
     </Card>
   );
 }

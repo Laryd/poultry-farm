@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Package2, Egg, Pill, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Package2, Egg, Pill, DollarSign, Settings } from 'lucide-react';
 
 const navItems = [
   {
@@ -20,6 +20,11 @@ const navItems = [
     href: '/finances',
     label: 'Finances',
     icon: DollarSign,
+  },
+  {
+    href: '/settings/vaccine-templates',
+    label: 'Settings',
+    icon: Settings,
   },
 ];
 

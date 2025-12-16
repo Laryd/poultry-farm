@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db/mongodb';
 import Vaccination from '@/lib/models/Vaccination';
+import Transaction from '@/lib/models/Transaction';
+import Batch from '@/lib/models/Batch';
 import { requireAuth } from '@/lib/auth/get-session';
 import { markVaccinationCompleteSchema } from '@/lib/validations/schemas';
 import { Types } from 'mongoose';
@@ -37,13 +40,21 @@ export async function PATCH(
       );
     }
 
-    const { completedDate } = validatedFields.data;
+    const { completedDate, actualCost } = validatedFields.data;
 
     await connectDB();
 
+    // Update vaccination with completedDate and actualCost
+    const updateData: any = {
+      completedDate: completedDate ? new Date(completedDate) : new Date(),
+    };
+    if (actualCost !== undefined) {
+      updateData.actualCost = actualCost;
+    }
+
     const vaccination = await Vaccination.findOneAndUpdate(
       { _id: id, userId: session!.user.id },
-      { $set: { completedDate: completedDate ? new Date(completedDate) : new Date() } },
+      { $set: updateData },
       { new: true }
     ).populate('batchId', 'name');
 
@@ -52,6 +63,28 @@ export async function PATCH(
         { success: false, error: 'Vaccination not found' },
         { status: 404 }
       );
+    }
+
+    // Auto-create expense transaction if actualCost > 0
+    if (actualCost && actualCost > 0) {
+      const batchName = vaccination.batchId && typeof vaccination.batchId === 'object'
+        ? (vaccination.batchId as any).name
+        : 'Unknown Batch';
+
+      await Transaction.create({
+        userId: session!.user.id,
+        type: 'expense',
+        category: 'Vaccines',
+        amount: actualCost,
+        description: `Vaccine: ${vaccination.vaccineName} - Batch: ${batchName}`,
+        batchId: vaccination.batchId,
+        vaccinationId: vaccination._id,
+        date: updateData.completedDate,
+      });
+
+      // Revalidate pages that show financial data
+      revalidatePath('/dashboard');
+      revalidatePath('/finances');
     }
 
     return NextResponse.json({

@@ -12,12 +12,11 @@ export async function GET() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const threeDaysFromNow = addDays(today, 3);
     const tomorrow = addDays(today, 1);
 
-    // Find vaccinations that are upcoming (within 3 days) and not completed
+    // Find vaccinations that are due today or tomorrow and not completed
     const upcomingVaccinations = await Vaccination.find({
-      scheduledDate: { $gte: today, $lte: threeDaysFromNow },
+      scheduledDate: { $gte: today, $lte: tomorrow },
       completedDate: null,
     }).populate('batchId', 'name batchCode').populate('userId', 'email name');
 
@@ -40,9 +39,6 @@ export async function GET() {
         shouldNotify = true;
       } else if (isSameDay(scheduledDate, tomorrow)) {
         message = `Vaccination "${vaccination.vaccineName}" for batch ${batchId.name} is scheduled TOMORROW!`;
-        shouldNotify = true;
-      } else if (daysUntil === 3) {
-        message = `Vaccination "${vaccination.vaccineName}" for batch ${batchId.name} is scheduled in 3 days.`;
         shouldNotify = true;
       }
 

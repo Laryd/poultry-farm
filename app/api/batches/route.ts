@@ -3,8 +3,11 @@ import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db/mongodb';
 import Batch from '@/lib/models/Batch';
 import Transaction from '@/lib/models/Transaction';
+import VaccineTemplate from '@/lib/models/VaccineTemplate';
+import Vaccination from '@/lib/models/Vaccination';
 import { requireAuth } from '@/lib/auth/get-session';
 import { createBatchSchema } from '@/lib/validations/schemas';
+import { Types } from 'mongoose';
 
 export async function GET() {
   try {
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, currentSize, breed, category, startDate, totalCost } = validatedFields.data;
+    const { name, currentSize, breed, category, startDate, totalCost, vaccineTemplateIds } = validatedFields.data;
     let { batchCode } = validatedFields.data;
 
     await connectDB();
@@ -97,6 +100,35 @@ export async function POST(request: NextRequest) {
       // Revalidate pages that show financial data
       revalidatePath('/dashboard');
       revalidatePath('/finances');
+    }
+
+    // Auto-create vaccinations from selected templates
+    if (vaccineTemplateIds && vaccineTemplateIds.length > 0) {
+      // Fetch all selected templates
+      const templates = await VaccineTemplate.find({
+        _id: { $in: vaccineTemplateIds.map(id => new Types.ObjectId(id)) },
+        userId: session!.user.id,
+        active: true,
+      });
+
+      // Create vaccination records for each template
+      const vaccinations = templates.map(template => {
+        const scheduledDate = new Date(batch.startDate);
+        scheduledDate.setDate(scheduledDate.getDate() + template.ageInDays);
+
+        return {
+          userId: session!.user.id,
+          batchId: batch._id,
+          vaccineTemplateId: template._id,
+          vaccineName: template.name,
+          scheduledDate,
+          ageInDays: template.ageInDays,
+        };
+      });
+
+      if (vaccinations.length > 0) {
+        await Vaccination.insertMany(vaccinations);
+      }
     }
 
     return NextResponse.json(

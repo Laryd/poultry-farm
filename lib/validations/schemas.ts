@@ -19,6 +19,7 @@ export const createBatchSchema = z.object({
   category: z.enum(['chick', 'adult']).default('chick'),
   startDate: z.string().or(z.date()),
   totalCost: z.number().min(0, 'Total cost cannot be negative').optional(),
+  vaccineTemplateIds: z.array(z.string()).optional(),
 });
 
 export const updateBatchSchema = z.object({
@@ -69,6 +70,22 @@ export const createVaccinationSchema = z.object({
 
 export const markVaccinationCompleteSchema = z.object({
   completedDate: z.string().or(z.date()).optional(),
+  actualCost: z.number().min(0, 'Cost cannot be negative').optional(),
+});
+
+export const createVaccineTemplateSchema = z.object({
+  name: z.string().min(1, 'Vaccine name is required'),
+  defaultCost: z.number().min(0, 'Cost cannot be negative'),
+  ageInDays: z.number().int().min(0, 'Age in days cannot be negative'),
+  description: z.string().optional(),
+});
+
+export const updateVaccineTemplateSchema = z.object({
+  name: z.string().min(1).optional(),
+  defaultCost: z.number().min(0).optional(),
+  ageInDays: z.number().int().min(0).optional(),
+  description: z.string().optional(),
+  active: z.boolean().optional(),
 });
 
 export const createTransactionSchema = z.object({
@@ -79,6 +96,7 @@ export const createTransactionSchema = z.object({
   batchId: z.string().optional(),
   feedId: z.string().optional(),
   eggId: z.string().optional(),
+  vaccinationId: z.string().optional(),
   date: z.string().or(z.date()).optional(),
 });
 
@@ -101,5 +119,7 @@ export type CreateIncubatorLogInput = z.infer<typeof createIncubatorLogSchema>;
 export type CreateFeedLogInput = z.infer<typeof createFeedLogSchema>;
 export type CreateVaccinationInput = z.infer<typeof createVaccinationSchema>;
 export type MarkVaccinationCompleteInput = z.infer<typeof markVaccinationCompleteSchema>;
+export type CreateVaccineTemplateInput = z.infer<typeof createVaccineTemplateSchema>;
+export type UpdateVaccineTemplateInput = z.infer<typeof updateVaccineTemplateSchema>;
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;

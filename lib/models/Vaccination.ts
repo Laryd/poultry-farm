@@ -5,9 +5,11 @@ export type VaccinationStatus = 'pending' | 'completed' | 'overdue';
 export interface IVaccination extends Document {
   userId: Types.ObjectId;
   batchId: Types.ObjectId;
+  vaccineTemplateId?: Types.ObjectId;
   vaccineName: string;
   scheduledDate: Date;
   completedDate?: Date;
+  actualCost?: number;
   ageInDays: number;
   notes?: string;
   createdAt: Date;
@@ -27,6 +29,11 @@ const VaccinationSchema: Schema<IVaccination> = new Schema(
       ref: 'Batch',
       required: true,
     },
+    vaccineTemplateId: {
+      type: Schema.Types.ObjectId,
+      ref: 'VaccineTemplate',
+      index: true,
+    },
     vaccineName: {
       type: String,
       required: [true, 'Vaccine name is required'],
@@ -38,6 +45,10 @@ const VaccinationSchema: Schema<IVaccination> = new Schema(
     },
     completedDate: {
       type: Date,
+    },
+    actualCost: {
+      type: Number,
+      min: [0, 'Cost cannot be negative'],
     },
     ageInDays: {
       type: Number,
