@@ -49,7 +49,9 @@ export default function BatchList({ batches }: BatchListProps) {
 
   const renderBatchCard = (batch: Batch) => {
     const ageInDays = calculateAge(batch.startDate);
-    const mortalityRate = ((batch.initialSize - batch.currentSize) / batch.initialSize * 100).toFixed(1);
+    const mortalityRate = batch.initialSize > 0
+      ? ((batch.initialSize - batch.currentSize) / batch.initialSize * 100).toFixed(1)
+      : '0.0';
 
     return (
       <Card key={batch._id} className="hover:shadow-lg transition-shadow">

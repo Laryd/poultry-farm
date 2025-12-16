@@ -16,12 +16,16 @@ export const createBatchSchema = z.object({
   name: z.string().min(1, 'Batch name is required'),
   currentSize: z.number().int().min(1, 'Batch size must be at least 1'),
   breed: z.string().min(1, 'Breed is required'),
+  category: z.enum(['chick', 'adult']).default('chick'),
   startDate: z.string().or(z.date()),
+  totalCost: z.number().min(0, 'Total cost cannot be negative').optional(),
+  vaccineTemplateIds: z.array(z.string()).optional(),
 });
 
 export const updateBatchSchema = z.object({
   name: z.string().min(1).optional(),
   breed: z.string().min(1).optional(),
+  category: z.enum(['chick', 'adult']).optional(),
   archived: z.boolean().optional(),
 });
 
@@ -37,6 +41,7 @@ export const createEggLogSchema = z.object({
   sold: z.number().int().min(0, 'Sold eggs cannot be negative').default(0),
   spoiled: z.number().int().min(0, 'Spoiled eggs cannot be negative').default(0),
   date: z.string().or(z.date()).optional(),
+  pricePerEgg: z.number().min(0, 'Price per egg cannot be negative').optional(),
 });
 
 export const createIncubatorLogSchema = z.object({
@@ -65,6 +70,43 @@ export const createVaccinationSchema = z.object({
 
 export const markVaccinationCompleteSchema = z.object({
   completedDate: z.string().or(z.date()).optional(),
+  actualCost: z.number().min(0, 'Cost cannot be negative').optional(),
+});
+
+export const createVaccineTemplateSchema = z.object({
+  name: z.string().min(1, 'Vaccine name is required'),
+  defaultCost: z.number().min(0, 'Cost cannot be negative'),
+  ageInDays: z.number().int().min(0, 'Age in days cannot be negative'),
+  description: z.string().optional(),
+});
+
+export const updateVaccineTemplateSchema = z.object({
+  name: z.string().min(1).optional(),
+  defaultCost: z.number().min(0).optional(),
+  ageInDays: z.number().int().min(0).optional(),
+  description: z.string().optional(),
+  active: z.boolean().optional(),
+});
+
+export const createTransactionSchema = z.object({
+  type: z.enum(['income', 'expense']),
+  category: z.string().min(1, 'Category is required'),
+  amount: z.number().min(0, 'Amount cannot be negative'),
+  description: z.string().min(1, 'Description is required'),
+  batchId: z.string().optional(),
+  feedId: z.string().optional(),
+  eggId: z.string().optional(),
+  vaccinationId: z.string().optional(),
+  date: z.string().or(z.date()).optional(),
+});
+
+export const updateTransactionSchema = z.object({
+  type: z.enum(['income', 'expense']).optional(),
+  category: z.string().min(1).optional(),
+  amount: z.number().min(0).optional(),
+  description: z.string().min(1).optional(),
+  batchId: z.string().optional(),
+  date: z.string().or(z.date()).optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -77,3 +119,7 @@ export type CreateIncubatorLogInput = z.infer<typeof createIncubatorLogSchema>;
 export type CreateFeedLogInput = z.infer<typeof createFeedLogSchema>;
 export type CreateVaccinationInput = z.infer<typeof createVaccinationSchema>;
 export type MarkVaccinationCompleteInput = z.infer<typeof markVaccinationCompleteSchema>;
+export type CreateVaccineTemplateInput = z.infer<typeof createVaccineTemplateSchema>;
+export type UpdateVaccineTemplateInput = z.infer<typeof updateVaccineTemplateSchema>;
+export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
+export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;

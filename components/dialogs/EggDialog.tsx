@@ -25,6 +25,7 @@ interface Batch {
   _id: string;
   batchCode: string;
   name: string;
+  category: 'chick' | 'adult';
 }
 
 interface EggDialogProps {
@@ -41,6 +42,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
     collected: '0',
     sold: '0',
     spoiled: '0',
+    pricePerEgg: '',
   });
 
   useEffect(() => {
@@ -55,7 +57,13 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
       const result = await response.json();
       if (result.success) {
         const activeBatches = result.data.filter((b: any) => !b.archived);
-        setBatches(activeBatches);
+        // Sort batches: adults first (for egg laying), then chicks
+        const sortedBatches = activeBatches.sort((a: Batch, b: Batch) => {
+          if (a.category === 'adult' && b.category === 'chick') return -1;
+          if (a.category === 'chick' && b.category === 'adult') return 1;
+          return 0;
+        });
+        setBatches(sortedBatches);
       }
     } catch (error) {
       console.error('Failed to fetch batches:', error);
@@ -81,6 +89,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
           collected: parseInt(formData.collected),
           sold: parseInt(formData.sold),
           spoiled: parseInt(formData.spoiled),
+          pricePerEgg: formData.pricePerEgg ? parseFloat(formData.pricePerEgg) : undefined,
         }),
       });
 
@@ -91,7 +100,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
       }
 
       toast.success(data.message || 'Egg log recorded successfully');
-      setFormData({ batchId: '', collected: '0', sold: '0', spoiled: '0' });
+      setFormData({ batchId: '', collected: '0', sold: '0', spoiled: '0', pricePerEgg: '' });
       onOpenChange(false);
       router.refresh();
     } catch (error: any) {
@@ -123,7 +132,7 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
               <SelectContent>
                 {batches.map((batch) => (
                   <SelectItem key={batch._id} value={batch._id}>
-                    {batch.name} ({batch.batchCode})
+                    {batch.name} ({batch.batchCode}) - {batch.category === 'adult' ? '🐔 Adult' : '🐣 Chick'}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -161,6 +170,22 @@ export default function EggDialog({ open, onOpenChange }: EggDialogProps) {
               value={formData.spoiled}
               onChange={(e) => setFormData({ ...formData, spoiled: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="pricePerEgg">Price per Egg (Optional)</Label>
+            <Input
+              id="pricePerEgg"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="e.g., 15"
+              value={formData.pricePerEgg}
+              onChange={(e) => setFormData({ ...formData, pricePerEgg: e.target.value })}
+            />
+            <p className="text-sm text-muted-foreground">
+              Price per egg sold. Income transaction will be created automatically.
+            </p>
           </div>
 
           <div className="flex gap-2">

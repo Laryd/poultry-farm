@@ -9,6 +9,7 @@ import SummaryCards from '@/components/dashboard/SummaryCards';
 import VaccineReminders from '@/components/notifications/VaccineReminders';
 import BatchFilter from '@/components/dashboard/BatchFilter';
 import DashboardClientWrapper from '@/components/dashboard/DashboardClientWrapper';
+import DashboardFinancialSummary from '@/components/dashboard/DashboardFinancialSummary';
 import { Types } from 'mongoose';
 
 async function getDashboardData(userId: string, batchId?: string) {
@@ -23,19 +24,8 @@ async function getDashboardData(userId: string, batchId?: string) {
 
   const totalBirds = batches.reduce((sum, batch) => sum + batch.currentSize, 0);
 
-  const chickBatches = batches.filter((batch) => {
-    const ageInDays = Math.floor(
-      (Date.now() - new Date(batch.startDate).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return ageInDays < 90;
-  });
-
-  const adultBatches = batches.filter((batch) => {
-    const ageInDays = Math.floor(
-      (Date.now() - new Date(batch.startDate).getTime()) / (1000 * 60 * 60 * 24)
-    );
-    return ageInDays >= 90;
-  });
+  const chickBatches = batches.filter((batch) => batch.category === 'chick');
+  const adultBatches = batches.filter((batch) => batch.category === 'adult');
 
   const totalChicks = chickBatches.reduce((sum, batch) => sum + batch.currentSize, 0);
   const totalAdults = adultBatches.reduce((sum, batch) => sum + batch.currentSize, 0);
@@ -152,6 +142,8 @@ export default async function DashboardPage({
       </div>
 
       <SummaryCards data={data} />
+
+      <DashboardFinancialSummary batchId={batchId} />
 
       <DashboardClientWrapper batchId={batchId} />
     </div>

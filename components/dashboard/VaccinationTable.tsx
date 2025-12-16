@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDate } from '@/lib/utils/date';
+import CompleteVaccinationDialog from './CompleteVaccinationDialog';
 
 interface Vaccination {
   _id: string;
@@ -37,6 +38,8 @@ export default function VaccinationTable({ batchId, refreshKey }: VaccinationTab
   const router = useRouter();
   const [vaccinations, setVaccinations] = useState<Vaccination[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedVaccination, setSelectedVaccination] = useState<Vaccination | null>(null);
 
   useEffect(() => {
     fetchVaccinations();
@@ -57,26 +60,14 @@ export default function VaccinationTable({ batchId, refreshKey }: VaccinationTab
     }
   };
 
-  const markAsCompleted = async (id: string) => {
-    try {
-      const response = await fetch(`/api/vaccinations/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      });
+  const handleMarkAsCompleted = (vaccination: Vaccination) => {
+    setSelectedVaccination(vaccination);
+    setDialogOpen(true);
+  };
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to mark vaccination as completed');
-      }
-
-      toast.success('Vaccination marked as completed');
-      fetchVaccinations();
-      router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update vaccination');
-    }
+  const handleDialogSuccess = () => {
+    fetchVaccinations();
+    router.refresh();
   };
 
   const getStatusBadge = (status: string) => {
@@ -137,7 +128,7 @@ export default function VaccinationTable({ batchId, refreshKey }: VaccinationTab
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => markAsCompleted(vaccination._id)}
+                          onClick={() => handleMarkAsCompleted(vaccination)}
                         >
                           <Check className="h-4 w-4 mr-1" />
                           Mark Done
@@ -151,6 +142,12 @@ export default function VaccinationTable({ batchId, refreshKey }: VaccinationTab
           </div>
         )}
       </CardContent>
+      <CompleteVaccinationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        vaccination={selectedVaccination}
+        onSuccess={handleDialogSuccess}
+      />
     </Card>
   );
 }

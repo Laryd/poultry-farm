@@ -8,8 +8,11 @@ export interface IBatch extends Document {
   currentSize: number;
   initialSize: number;
   breed: string;
+  category: 'chick' | 'adult';
   startDate: Date;
   archived: boolean;
+  totalCost?: number;
+  costPerBird?: number;
   createdAt: Date;
   updatedAt: Date;
   getAgeInDays(): number;
@@ -57,6 +60,12 @@ const BatchSchema: Schema<IBatch> = new Schema(
       required: [true, 'Breed is required'],
       trim: true,
     },
+    category: {
+      type: String,
+      enum: ['chick', 'adult'],
+      required: [true, 'Category is required'],
+      default: 'chick',
+    },
     startDate: {
       type: Date,
       required: [true, 'Start date is required'],
@@ -64,6 +73,14 @@ const BatchSchema: Schema<IBatch> = new Schema(
     archived: {
       type: Boolean,
       default: false,
+    },
+    totalCost: {
+      type: Number,
+      min: [0, 'Total cost cannot be negative'],
+    },
+    costPerBird: {
+      type: Number,
+      min: [0, 'Cost per bird cannot be negative'],
     },
   },
   {
@@ -74,12 +91,19 @@ const BatchSchema: Schema<IBatch> = new Schema(
 BatchSchema.index({ userId: 1, archived: 1 });
 BatchSchema.index({ startDate: 1 });
 
+BatchSchema.pre('save', function (next) {
+  if (this.totalCost && this.initialSize > 0) {
+    this.costPerBird = this.totalCost / this.initialSize;
+  }
+  next();
+});
+
 BatchSchema.methods.getAgeInDays = function (): number {
   return daysBetween(this.startDate, new Date());
 };
 
 BatchSchema.methods.isChick = function (): boolean {
-  return this.getAgeInDays() < 90;
+  return this.category === 'chick';
 };
 
 BatchSchema.methods.canLayEggs = function (): boolean {

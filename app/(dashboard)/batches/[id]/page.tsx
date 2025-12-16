@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate, daysBetween } from '@/lib/utils/date';
+import AddVaccinesButton from '@/components/batches/AddVaccinesButton';
 
 async function getBatchDetails(batchId: string, userId: string) {
   await connectDB();
@@ -88,7 +89,9 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
   const { batch, mortalityRecords, vaccinations } = data;
   const ageInDays = daysBetween(new Date(batch.startDate), new Date());
   const ageWeeks = Math.floor(ageInDays / 7);
-  const mortalityRate = ((batch.initialSize - batch.currentSize) / batch.initialSize * 100).toFixed(1);
+  const mortalityRate = batch.initialSize > 0
+    ? ((batch.initialSize - batch.currentSize) / batch.initialSize * 100).toFixed(1)
+    : '0.0';
   const totalMortalities = batch.initialSize - batch.currentSize;
 
   return (
@@ -251,8 +254,17 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
 
       <Card>
         <CardHeader>
-          <CardTitle>Vaccination Schedule</CardTitle>
-          <CardDescription>Scheduled and completed vaccinations</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Vaccination Schedule</CardTitle>
+              <CardDescription>Scheduled and completed vaccinations</CardDescription>
+            </div>
+            <AddVaccinesButton
+              batchId={batch._id}
+              batchName={batch.name}
+              batchStartDate={batch.startDate}
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {vaccinations.length === 0 ? (

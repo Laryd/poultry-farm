@@ -24,7 +24,9 @@ import { toast } from 'sonner';
 interface Batch {
   _id: string;
   name: string;
+  batchCode: string;
   currentSize: number;
+  category: 'chick' | 'adult';
 }
 
 interface MortalityDialogProps {
@@ -53,7 +55,14 @@ export default function MortalityDialog({ open, onOpenChange }: MortalityDialogP
       const response = await fetch('/api/batches');
       const data = await response.json();
       if (data.success) {
-        setBatches(data.data.filter((b: any) => !b.archived));
+        const activeBatches = data.data.filter((b: any) => !b.archived);
+        // Sort batches: chicks first, then adults
+        const sortedBatches = activeBatches.sort((a: Batch, b: Batch) => {
+          if (a.category === 'chick' && b.category === 'adult') return -1;
+          if (a.category === 'adult' && b.category === 'chick') return 1;
+          return 0;
+        });
+        setBatches(sortedBatches);
       }
     } catch (error) {
       toast.error('Failed to fetch batches');
@@ -110,7 +119,7 @@ export default function MortalityDialog({ open, onOpenChange }: MortalityDialogP
               <SelectContent>
                 {batches.map((batch) => (
                   <SelectItem key={batch._id} value={batch._id}>
-                    {batch.name} ({batch.currentSize} birds)
+                    {batch.name} ({batch.batchCode}) - {batch.category === 'adult' ? '🐔 Adult' : '🐣 Chick'} ({batch.currentSize} birds)
                   </SelectItem>
                 ))}
               </SelectContent>

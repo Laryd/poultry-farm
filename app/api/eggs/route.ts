@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db/mongodb';
 import Egg from '@/lib/models/Egg';
 import Batch from '@/lib/models/Batch';
+import Transaction from '@/lib/models/Transaction';
 import { requireAuth } from '@/lib/auth/get-session';
 import { createEggLogSchema } from '@/lib/validations/schemas';
 import { Types } from 'mongoose';
@@ -48,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { batchId, collected, sold, spoiled, date } = validatedFields.data;
+    const { batchId, collected, sold, spoiled, date, pricePerEgg } = validatedFields.data;
 
     await connectDB();
 
@@ -59,7 +61,28 @@ export async function POST(request: NextRequest) {
       sold,
       spoiled,
       date: date ? new Date(date) : new Date(),
+      pricePerEgg,
     });
+
+    // Auto-create income transaction if eggs sold with price
+    if (sold > 0 && pricePerEgg && pricePerEgg > 0) {
+      const totalRevenue = sold * pricePerEgg;
+
+      await Transaction.create({
+        userId: session!.user.id,
+        type: 'income',
+        category: 'Egg Sales',
+        amount: totalRevenue,
+        description: `Egg sales: ${sold} eggs @ ${pricePerEgg.toFixed(2)} each`,
+        batchId: new Types.ObjectId(batchId),
+        eggId: egg._id,
+        date: egg.date,
+      });
+
+      // Revalidate pages that show financial data
+      revalidatePath('/dashboard');
+      revalidatePath('/finances');
+    }
 
     return NextResponse.json(
       {

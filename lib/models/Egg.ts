@@ -6,6 +6,8 @@ export interface IEgg extends Document {
   collected: number;
   sold: number;
   spoiled: number;
+  pricePerEgg?: number;
+  totalRevenue?: number;
   date: Date;
   createdAt: Date;
 }
@@ -42,6 +44,14 @@ const EggSchema: Schema<IEgg> = new Schema(
       min: [0, 'Spoiled eggs cannot be negative'],
       default: 0,
     },
+    pricePerEgg: {
+      type: Number,
+      min: [0, 'Price per egg cannot be negative'],
+    },
+    totalRevenue: {
+      type: Number,
+      min: [0, 'Total revenue cannot be negative'],
+    },
     date: {
       type: Date,
       required: true,
@@ -54,6 +64,13 @@ const EggSchema: Schema<IEgg> = new Schema(
 );
 
 EggSchema.index({ userId: 1, date: -1 });
+
+EggSchema.pre('save', function (next) {
+  if (this.pricePerEgg && this.sold > 0) {
+    this.totalRevenue = this.sold * this.pricePerEgg;
+  }
+  next();
+});
 
 const Egg: Model<IEgg> = mongoose.models.Egg || mongoose.model<IEgg>('Egg', EggSchema);
 
