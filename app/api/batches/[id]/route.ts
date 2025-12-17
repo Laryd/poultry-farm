@@ -64,7 +64,6 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    console.log('[BATCH UPDATE] Received body:', body);
 
     const validatedFields = updateBatchSchema.safeParse(body);
 
@@ -95,9 +94,6 @@ export async function PATCH(
     const maleCount = validatedFields.data.maleCount ?? existingBatch.maleCount ?? 0;
     const femaleCount = validatedFields.data.femaleCount ?? existingBatch.femaleCount ?? 0;
 
-    console.log('[BATCH UPDATE] Validated data:', validatedFields.data);
-    console.log('[BATCH UPDATE] Gender counts - male:', maleCount, 'female:', femaleCount);
-
     if (maleCount + femaleCount > existingBatch.currentSize) {
       return NextResponse.json(
         {
@@ -113,8 +109,6 @@ export async function PATCH(
       { $set: validatedFields.data },
       { new: true, runValidators: true }
     );
-
-    console.log('[BATCH UPDATE] Updated batch:', { maleCount: batch?.maleCount, femaleCount: batch?.femaleCount });
 
     if (!batch) {
       return NextResponse.json(

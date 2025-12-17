@@ -61,8 +61,6 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
     setIsLoading(true);
 
     try {
-      console.log('[BATCH EDIT] Current formData state:', formData);
-
       // Build payload with only defined values to ensure fields are properly updated
       const payload: any = {
         name: formData.name,
@@ -74,14 +72,10 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
       // Include gender counts if they have values (including 0)
       if (formData.maleCount !== undefined) {
         payload.maleCount = formData.maleCount;
-        console.log('[BATCH EDIT] Including maleCount:', formData.maleCount);
       }
       if (formData.femaleCount !== undefined) {
         payload.femaleCount = formData.femaleCount;
-        console.log('[BATCH EDIT] Including femaleCount:', formData.femaleCount);
       }
-
-      console.log('[BATCH EDIT] Sending payload:', payload);
 
       const response = await fetch(`/api/batches/${batch._id}`, {
         method: 'PATCH',
@@ -90,8 +84,6 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
       });
 
       const data = await response.json();
-
-      console.log('[BATCH EDIT] Response:', data);
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to update batch');
@@ -206,7 +198,6 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
               onChange={(e) => {
                 const value = e.target.value;
                 const newValue = value === '' ? undefined : parseInt(value, 10);
-                console.log('[FORM] Male count changed to:', newValue);
                 setFormData({ ...formData, maleCount: newValue });
               }}
             />
@@ -222,7 +213,6 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
               onChange={(e) => {
                 const value = e.target.value;
                 const newValue = value === '' ? undefined : parseInt(value, 10);
-                console.log('[FORM] Female count changed to:', newValue);
                 setFormData({ ...formData, femaleCount: newValue });
               }}
             />
