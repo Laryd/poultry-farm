@@ -61,6 +61,8 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
     setIsLoading(true);
 
     try {
+      console.log('[BATCH EDIT] Current formData state:', formData);
+
       // Build payload with only defined values to ensure fields are properly updated
       const payload: any = {
         name: formData.name,
@@ -72,9 +74,11 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
       // Include gender counts if they have values (including 0)
       if (formData.maleCount !== undefined) {
         payload.maleCount = formData.maleCount;
+        console.log('[BATCH EDIT] Including maleCount:', formData.maleCount);
       }
       if (formData.femaleCount !== undefined) {
         payload.femaleCount = formData.femaleCount;
+        console.log('[BATCH EDIT] Including femaleCount:', formData.femaleCount);
       }
 
       console.log('[BATCH EDIT] Sending payload:', payload);
@@ -199,7 +203,12 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
               min="0"
               placeholder="Optional"
               value={formData.maleCount ?? ''}
-              onChange={(e) => setFormData({ ...formData, maleCount: e.target.value ? parseInt(e.target.value) : undefined })}
+              onChange={(e) => {
+                const value = e.target.value;
+                const newValue = value === '' ? undefined : parseInt(value, 10);
+                console.log('[FORM] Male count changed to:', newValue);
+                setFormData({ ...formData, maleCount: newValue });
+              }}
             />
           </div>
           <div className="space-y-2">
@@ -210,7 +219,12 @@ export default function BatchEditForm({ batch }: BatchEditFormProps) {
               min="0"
               placeholder="Optional"
               value={formData.femaleCount ?? ''}
-              onChange={(e) => setFormData({ ...formData, femaleCount: e.target.value ? parseInt(e.target.value) : undefined })}
+              onChange={(e) => {
+                const value = e.target.value;
+                const newValue = value === '' ? undefined : parseInt(value, 10);
+                console.log('[FORM] Female count changed to:', newValue);
+                setFormData({ ...formData, femaleCount: newValue });
+              }}
             />
           </div>
         </div>
