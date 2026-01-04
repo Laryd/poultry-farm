@@ -11,6 +11,7 @@ import { ArrowLeft, Edit, Archive } from 'lucide-react';
 import Link from 'next/link';
 import { formatDate, daysBetween } from '@/lib/utils/date';
 import AddVaccinesButton from '@/components/batches/AddVaccinesButton';
+import DownloadVaccinationsButton from '@/components/batches/DownloadVaccinationsButton';
 
 async function getBatchDetails(batchId: string, userId: string) {
   await connectDB();
@@ -278,11 +279,17 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               <CardTitle>Vaccination Schedule</CardTitle>
               <CardDescription>Scheduled and completed vaccinations</CardDescription>
             </div>
-            <AddVaccinesButton
-              batchId={batch._id}
-              batchName={batch.name}
-              batchStartDate={batch.startDate}
-            />
+            <div className="flex items-center gap-2">
+              <DownloadVaccinationsButton
+                batch={batch}
+                vaccinations={vaccinations}
+              />
+              <AddVaccinesButton
+                batchId={batch._id}
+                batchName={batch.name}
+                batchStartDate={batch.startDate}
+              />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
