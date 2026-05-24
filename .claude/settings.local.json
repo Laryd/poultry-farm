@@ -18,7 +18,16 @@
       "Bash(git commit:*)",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\work\\\\poultry-farm\" -Force)",
+      "Bash(Select-Object -Property Mode, Name)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx tsc *)",
+      "Bash(npx next *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\work\\\\poultry-farm\" -Recurse -File)",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)",
+      "Bash(grep -E '\\\\.ts$')"
     ]
   }
 }
