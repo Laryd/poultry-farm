@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bird, Egg, Package } from 'lucide-react';
 
 interface SummaryCardsProps {
@@ -16,90 +15,92 @@ interface SummaryCardsProps {
   };
 }
 
-export default function SummaryCards({ data }: SummaryCardsProps) {
+interface StatCardProps {
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  extra?: string;
+  icon: React.ElementType;
+  iconColor: string;
+  iconBg: string;
+  accent: string;
+}
+
+function StatCard({ title, value, subtitle, extra, icon: Icon, iconColor, iconBg, accent }: StatCardProps) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Total Birds
-          </CardTitle>
-          <Bird className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{data.totalBirds}</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {data.totalChicks} chicks, {data.totalAdults} adults
-          </p>
-          {(data.totalMales > 0 || data.totalFemales > 0) && (
-            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-              {data.totalMales > 0 && `${data.totalMales} males`}
-              {data.totalMales > 0 && data.totalFemales > 0 && ', '}
-              {data.totalFemales > 0 && `${data.totalFemales} females`}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+    <div className="glass-card rounded-2xl p-5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-200">
+      <div className={`absolute top-0 right-0 w-24 h-24 rounded-full blur-2xl opacity-15 ${accent}`} />
+      <div className="flex items-start justify-between mb-3">
+        <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{title}</p>
+        <div className={`h-8 w-8 rounded-lg ${iconBg} flex items-center justify-center`}>
+          <Icon className={`h-4 w-4 ${iconColor}`} />
+        </div>
+      </div>
+      <p className="text-3xl font-bold text-slate-900 dark:text-white">{value}</p>
+      {subtitle && (
+        <p className="text-xs text-slate-500 dark:text-slate-500 mt-1.5">{subtitle}</p>
+      )}
+      {extra && (
+        <p className="text-xs text-slate-400 dark:text-slate-600 mt-0.5">{extra}</p>
+      )}
+    </div>
+  );
+}
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Chicks
-          </CardTitle>
-          <Bird className="h-4 w-4 text-yellow-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{data.totalChicks}</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Day-old to young birds
-          </p>
-        </CardContent>
-      </Card>
+export default function SummaryCards({ data }: SummaryCardsProps) {
+  const genderInfo =
+    data.totalMales > 0 || data.totalFemales > 0
+      ? `${data.totalMales > 0 ? data.totalMales + ' ♂' : ''} ${data.totalFemales > 0 ? data.totalFemales + ' ♀' : ''}`.trim()
+      : undefined;
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Adults
-          </CardTitle>
-          <Bird className="h-4 w-4 text-green-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{data.totalAdults}</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Mature/laying birds
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Eggs Today
-          </CardTitle>
-          <Egg className="h-4 w-4 text-orange-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{data.eggsCollectedToday}</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            Sold: {data.eggsSoldToday}, Spoiled: {data.eggsSpoiledToday}
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-400">
-            Total Feed
-          </CardTitle>
-          <Package className="h-4 w-4 text-blue-600" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{data.totalFeedBags} bags</div>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {data.totalFeedKg.toFixed(1)} kg total
-          </p>
-        </CardContent>
-      </Card>
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+      <StatCard
+        title="Total Birds"
+        value={data.totalBirds}
+        subtitle={`${data.totalChicks} chicks · ${data.totalAdults} adults`}
+        extra={genderInfo}
+        icon={Bird}
+        iconColor="text-amber-600 dark:text-amber-400"
+        iconBg="bg-amber-100 dark:bg-amber-900/30"
+        accent="bg-amber-400"
+      />
+      <StatCard
+        title="Chicks"
+        value={data.totalChicks}
+        subtitle="Day-old to young birds"
+        icon={Bird}
+        iconColor="text-yellow-600 dark:text-yellow-400"
+        iconBg="bg-yellow-100 dark:bg-yellow-900/30"
+        accent="bg-yellow-400"
+      />
+      <StatCard
+        title="Adults"
+        value={data.totalAdults}
+        subtitle="Mature / laying birds"
+        icon={Bird}
+        iconColor="text-green-600 dark:text-green-400"
+        iconBg="bg-green-100 dark:bg-green-900/30"
+        accent="bg-green-400"
+      />
+      <StatCard
+        title="Eggs Today"
+        value={data.eggsCollectedToday}
+        subtitle={`Sold: ${data.eggsSoldToday} · Spoiled: ${data.eggsSpoiledToday}`}
+        icon={Egg}
+        iconColor="text-orange-600 dark:text-orange-400"
+        iconBg="bg-orange-100 dark:bg-orange-900/30"
+        accent="bg-orange-400"
+      />
+      <StatCard
+        title="Total Feed"
+        value={`${data.totalFeedBags} bags`}
+        subtitle={`${data.totalFeedKg.toFixed(1)} kg total`}
+        icon={Package}
+        iconColor="text-blue-600 dark:text-blue-400"
+        iconBg="bg-blue-100 dark:bg-blue-900/30"
+        accent="bg-blue-400"
+      />
     </div>
   );
 }
